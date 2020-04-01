@@ -1,0 +1,10 @@
+D:\CsTJMonstor\CsTJMonster\CsTJMonster\bin\Debug\CsTJMonster.exe.config
+D:\CsTJMonstor\CsTJMonster\bin\Debug\CsTJMonster.exe.config
+D:\CsTJMonstor\CsTJMonster\bin\Debug\CsTJMonster.exe
+D:\CsTJMonstor\CsTJMonster\bin\Debug\CsTJMonster.pdb
+D:\CsTJMonstor\CsTJMonster\obj\Debug\CsTJMonster.csprojResolveAssemblyReference.cache
+D:\CsTJMonstor\CsTJMonster\obj\Debug\CsTJMonster.Form1.resources
+D:\CsTJMonstor\CsTJMonster\obj\Debug\CsTJMonster.Properties.Resources.resources
+D:\CsTJMonstor\CsTJMonster\obj\Debug\CsTJMonster.csproj.GenerateResource.Cache
+D:\CsTJMonstor\CsTJMonster\obj\Debug\CsTJMonster.exe
+D:\CsTJMonstor\CsTJMonster\obj\Debug\CsTJMonster.pdb
