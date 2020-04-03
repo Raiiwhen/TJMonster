@@ -29,12 +29,11 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea5 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend5 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series5 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.button_OpenCOM = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
-            this.textBox2 = new System.Windows.Forms.TextBox();
             this.serialPort1 = new System.IO.Ports.SerialPort(this.components);
             this.panel1 = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
@@ -75,22 +74,13 @@
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(12, 140);
+            this.textBox1.Location = new System.Drawing.Point(12, 126);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox1.Size = new System.Drawing.Size(318, 108);
+            this.textBox1.Size = new System.Drawing.Size(516, 360);
             this.textBox1.TabIndex = 6;
             this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
-            // 
-            // textBox2
-            // 
-            this.textBox2.Location = new System.Drawing.Point(12, 254);
-            this.textBox2.Multiline = true;
-            this.textBox2.Name = "textBox2";
-            this.textBox2.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox2.Size = new System.Drawing.Size(318, 36);
-            this.textBox2.TabIndex = 7;
             // 
             // panel1
             // 
@@ -180,7 +170,7 @@
             // 
             // button_Sync
             // 
-            this.button_Sync.Location = new System.Drawing.Point(12, 296);
+            this.button_Sync.Location = new System.Drawing.Point(268, 6);
             this.button_Sync.Name = "button_Sync";
             this.button_Sync.Size = new System.Drawing.Size(48, 44);
             this.button_Sync.TabIndex = 9;
@@ -190,17 +180,17 @@
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(66, 296);
+            this.button3.Location = new System.Drawing.Point(321, 6);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(48, 44);
             this.button3.TabIndex = 10;
-            this.button3.Text = "Read";
+            this.button3.Text = "Stream";
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(120, 296);
+            this.button4.Location = new System.Drawing.Point(374, 6);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(48, 44);
             this.button4.TabIndex = 11;
@@ -210,16 +200,17 @@
             // 
             // button5
             // 
-            this.button5.Location = new System.Drawing.Point(174, 296);
+            this.button5.Location = new System.Drawing.Point(427, 6);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(48, 44);
             this.button5.TabIndex = 12;
-            this.button5.Text = "button5";
+            this.button5.Text = "meow";
             this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
             // 
             // button6
             // 
-            this.button6.Location = new System.Drawing.Point(228, 296);
+            this.button6.Location = new System.Drawing.Point(480, 6);
             this.button6.Name = "button6";
             this.button6.Size = new System.Drawing.Size(48, 44);
             this.button6.TabIndex = 13;
@@ -228,7 +219,7 @@
             // 
             // button7
             // 
-            this.button7.Location = new System.Drawing.Point(282, 296);
+            this.button7.Location = new System.Drawing.Point(268, 51);
             this.button7.Name = "button7";
             this.button7.Size = new System.Drawing.Size(48, 44);
             this.button7.TabIndex = 14;
@@ -244,9 +235,9 @@
             this.toolStripStatusLabel3,
             this.toolStripStatusLabel4,
             this.toolStripStatusLabel5});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 352);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 545);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(804, 25);
+            this.statusStrip1.Size = new System.Drawing.Size(1058, 25);
             this.statusStrip1.TabIndex = 15;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -283,25 +274,26 @@
             // 
             // chart1
             // 
-            chartArea2.Name = "ChartArea1";
-            this.chart1.ChartAreas.Add(chartArea2);
-            legend2.Name = "Legend1";
-            this.chart1.Legends.Add(legend2);
-            this.chart1.Location = new System.Drawing.Point(336, 12);
+            chartArea5.Name = "ChartArea1";
+            this.chart1.ChartAreas.Add(chartArea5);
+            legend5.Name = "Legend1";
+            this.chart1.Legends.Add(legend5);
+            this.chart1.Location = new System.Drawing.Point(534, 6);
             this.chart1.Name = "chart1";
-            series2.ChartArea = "ChartArea1";
-            series2.Legend = "Legend1";
-            series2.Name = "Series1";
-            this.chart1.Series.Add(series2);
-            this.chart1.Size = new System.Drawing.Size(456, 328);
+            series5.ChartArea = "ChartArea1";
+            series5.Legend = "Legend1";
+            series5.Name = "Series1";
+            this.chart1.Series.Add(series5);
+            this.chart1.Size = new System.Drawing.Size(515, 480);
             this.chart1.TabIndex = 16;
             this.chart1.Text = "chart1";
+            this.chart1.Click += new System.EventHandler(this.chart1_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(804, 377);
+            this.ClientSize = new System.Drawing.Size(1058, 570);
             this.Controls.Add(this.chart1);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.button7);
@@ -312,7 +304,6 @@
             this.Controls.Add(this.button_Sync);
             this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.panel1);
-            this.Controls.Add(this.textBox2);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.button_OpenCOM);
             this.Name = "Form1";
@@ -332,7 +323,6 @@
 
         private System.Windows.Forms.Button button_OpenCOM;
         private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.TextBox textBox2;
         private System.IO.Ports.SerialPort serialPort1;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.RadioButton radioButton5;

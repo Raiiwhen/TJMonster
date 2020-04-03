@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO.Ports;
+using System.Windows.Forms.DataVisualization.Charting;
 
 namespace CsTJMonster
 {
@@ -15,6 +16,7 @@ namespace CsTJMonster
     {
         private SerialPort obj;
         public List<byte> RX_Buffer;
+        public Series RX_stream;
 
         public Form1()
         {
@@ -29,11 +31,26 @@ namespace CsTJMonster
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            /*变量初始化*/
             RX_Buffer = new List<byte>(1024);
+            Series RX_stream = new Series("RX_stream");
+            /*波特率多选框comboBox初始话*/
             comboBox1.Items.Add(115200);
             comboBox1.Items.Add(9600);
             comboBox1.Items.Add(230400);
             comboBox1.SelectedIndex = 0;
+            /*数据表格初始化*/
+            chart1.Series.Clear();
+            RX_stream.ChartType = SeriesChartType.Column;
+            RX_stream.Points.AddXY("accx", "65535");
+            RX_stream.Points.AddXY("accy", "0");
+            RX_stream.Points.AddXY("accz", "32768");
+            RX_stream.Points.AddXY("gyrox", "225");
+            RX_stream.Points.AddXY("gyroy", "8987");
+            RX_stream.Points.AddXY("gyroz", "33443");
+            RX_stream.Points.AddXY("T", "13221");
+            chart1.Series.Add(RX_stream);
+            /*串口扫描&初始化*/
             scan_valid_serial();
             open_serial();
             status_ask();
@@ -145,7 +162,7 @@ namespace CsTJMonster
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (button_OpenCOM.Text == "Close")
+            if (obj.IsOpen)
             {
                 close_serial();
                 scan_valid_serial();
@@ -170,10 +187,19 @@ namespace CsTJMonster
             status_ask();
         }
 
+        private void cput(string str)
+        {
+            if (textBox1.Text.Length!=0 && textBox1.Text[textBox1.Text.Length-1] != '\n')
+            {
+                textBox1.AppendText("\r\n");
+            }
+            textBox1.AppendText(str);
+        }
+
         private bool status_update()
         {
             string tmp;
-            bool format_check = (RX_Buffer[0] == 0xb1) && (RX_Buffer[1] == 0xb1);
+            bool format_check = obj.IsOpen && RX_Buffer.Count>0 && (RX_Buffer[0] == 0xb1) && (RX_Buffer[1] == 0xb1);
             if (format_check)
             {
                 toolStripStatusLabel1.Text =
@@ -218,15 +244,29 @@ namespace CsTJMonster
         private void status_ask()
         {
             byte[] mst_echo = new byte[3] { 0x08, 0x0a, 0x0d };
-            obj.Write(mst_echo, 0, 3);
-            textBox2.AppendText("echo_cmd\r\n");
+            if (obj.IsOpen)
+            {
+                obj.Write(mst_echo, 0, 3);
+                cput("> echo_cmd\r\n");
+            }
+            else
+            {
+                cput("> Echo error. Serial Closed.\r\n");
+            }
         }
 
         private void data_stream()
         {
             byte[] mst_echo = new byte[3] { 0x09, 0x0a, 0x0d };
-            obj.Write(mst_echo, 0, 3);
-            textBox2.AppendText("data_stream\r\n");
+            if (obj.IsOpen)
+            {
+                obj.Write(mst_echo, 0, 3);
+                cput("> data_stream\r\n");
+            }
+            else
+            {
+                cput("> stream error. Serial Closed.\r\n");
+            }
         }
 
 
@@ -238,7 +278,23 @@ namespace CsTJMonster
 
         private void button4_Click(object sender, EventArgs e)
         {
+            RX_stream.Points.AddXY("accx", "65535");
+            RX_stream.Points.AddXY("accy", "0");
+            RX_stream.Points.AddXY("accz", "32768");
+            RX_stream.Points.AddXY("gyrox", "225");
+            RX_stream.Points.AddXY("gyroy", "8987");
+            RX_stream.Points.AddXY("gyroz", "33443");
+            RX_stream.Points.AddXY("T", "13221");
+            chart1.Series.Add(RX_stream);
+        }
+        private void button5_Click(object sender, EventArgs e)
+        {
+            System.Media.SystemSounds.Beep.Play();
+        }
 
+        private void chart1_Click(object sender, EventArgs e)
+        {
+            chart1.BackColor = Color.Beige;
         }
     }
 }
