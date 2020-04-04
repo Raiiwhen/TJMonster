@@ -1,0 +1,8 @@
+D:\CsTJMonstor\CsTJMonster\bin\Release\CsTJMonster.exe.config
+D:\CsTJMonstor\CsTJMonster\bin\Release\CsTJMonster.exe
+D:\CsTJMonstor\CsTJMonster\bin\Release\CsTJMonster.pdb
+D:\CsTJMonstor\CsTJMonster\obj\Release\CsTJMonster.Form1.resources
+D:\CsTJMonstor\CsTJMonster\obj\Release\CsTJMonster.Properties.Resources.resources
+D:\CsTJMonstor\CsTJMonster\obj\Release\CsTJMonster.csproj.GenerateResource.Cache
+D:\CsTJMonstor\CsTJMonster\obj\Release\CsTJMonster.exe
+D:\CsTJMonstor\CsTJMonster\obj\Release\CsTJMonster.pdb
