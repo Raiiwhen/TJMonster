@@ -22,6 +22,8 @@ namespace CsTJMonster
         Color color_disable = Color.LightGray;
         Color color_enable = Color.PaleTurquoise;
         Color color_error = Color.Lime;
+        int rate_speed_counter;
+        bool stream_en = false;
 
         public Form1()
         {
@@ -49,42 +51,55 @@ namespace CsTJMonster
             /*数据表格初始化*/
             chart1.Series.Clear();
             RX_stream.ChartType = SeriesChartType.Column;
-            RX_stream.Points.AddXY("accx", "65535");
-            RX_stream.Points.AddXY("accy", "0");
-            RX_stream.Points.AddXY("accz", "32768");
-            RX_stream.Points.AddXY("gyrox", "225");
-            RX_stream.Points.AddXY("gyroy", "8987");
-            RX_stream.Points.AddXY("gyroz", "33443");
-            RX_stream.Points.AddXY("T", "13221");
+            RX_stream.IsVisibleInLegend = false;
+            RX_stream.Points.AddXY("raw", "0"); 
             chart1.Series.Add(RX_stream);
+            chart1.ChartAreas[0].AxisY.Maximum = 32768;
+            chart1.ChartAreas[0].AxisY.Minimum = -32768;
             /*串口扫描和初始化*/
-            scan_valid_serial();
+            int valid_COM_cnt = scan_valid_serial();
+            groupBox2.Text = valid_COM_cnt.ToString() + " COMs";
             open_serial();
             if (obj.IsOpen)
             {
                 timer1.Enabled = true;
                 button_OpenCOM.BackColor = color_enable;
                 button_OpenCOM.Text = "Close";
-                button5.BackColor = color_enable;
+                button_Scan.Enabled = false;
+                button3.BackColor = color_enable;
                 status_ask();
+                stream_en = true;
+            }
+            else
+            {
+                timer1.Enabled = false;
+                button_OpenCOM.BackColor = color_disable;
+                button_OpenCOM.Text = "Open";
+                button_Scan.Enabled = true;
             }
         }
 
         private void port_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             SerialPort sp = obj;
-            int bytes2read = sp.BytesToRead;
-            byte[] buffer = new byte[bytes2read];
+            byte[] buffer = new byte[sp.BytesToRead];
+            try
+            {
+                sp.Read(buffer, 0, sp.BytesToRead);
+                RX_Buffer.AddRange(buffer);
+                rate_speed_counter += buffer.Length;
+            }
+            catch
+            {
 
-            sp.Read(buffer,0,bytes2read);
-            RX_Buffer.AddRange(buffer);
+            }
         }
 
-        private void scan_valid_serial()
+        private int scan_valid_serial()
         {
-            string[] com_list = new string[5];
+            string[] com_list = new string[5] { "-", "-", "-", "-", "-", };
             string buffer;
-            int valid_cnt = 0;
+            int valid_cnt = -1;
             for (int i = 0; i < 20; i++)
             {
                 try
@@ -95,9 +110,9 @@ namespace CsTJMonster
                     scan_COM.Open();
                     scan_COM.Close();
                     Console.WriteLine(buffer);
-                    if (valid_cnt < 5)
+                    if (valid_cnt++ < 5)
                     {
-                        com_list[valid_cnt++] = buffer;
+                        com_list[valid_cnt] = buffer;
                     }
                 }
                 catch
@@ -105,14 +120,16 @@ namespace CsTJMonster
                     continue;
                 }
             }
-            radioButton1.Text = com_list[0]; radioButton1.Enabled = com_list[0] == null ? false : true;
-            radioButton2.Text = com_list[1]; radioButton2.Enabled = com_list[1] == null ? false : true;
-            radioButton3.Text = com_list[2]; radioButton3.Enabled = com_list[2] == null ? false : true;
-            radioButton4.Text = com_list[3]; radioButton4.Enabled = com_list[3] == null ? false : true;
-            radioButton5.Text = com_list[4]; radioButton5.Enabled = com_list[4] == null ? false : true;
+            radioButton1.Text = com_list[0]; radioButton1.Enabled = com_list[0] == "-" ? false : true; 
+            radioButton2.Text = com_list[1]; radioButton2.Enabled = com_list[1] == "-" ? false : true;
+            radioButton3.Text = com_list[2]; radioButton3.Enabled = com_list[2] == "-" ? false : true;
+            radioButton4.Text = com_list[3]; radioButton4.Enabled = com_list[3] == "-" ? false : true; 
+            radioButton5.Text = com_list[4]; radioButton5.Enabled = com_list[4] == "-" ? false : true; 
+
+            return valid_cnt+1;
         }
 
-        private void open_serial()
+        private bool open_serial()
         {
             string current_port = "COM3";
 
@@ -136,22 +153,28 @@ namespace CsTJMonster
                 obj.DataReceived += new SerialDataReceivedEventHandler(port_DataReceived);
                 /*开串口*/
                 obj.Open();
+
+                return true;
             }
             catch
             {
-                Console.WriteLine("Serial Open Error.");
+                return false;
             }
         }
 
-        private void close_serial()
+        private bool close_serial()
         {
             try
             {
                 obj.Close();
+
+                return true;
             }
             catch
             {
                 Console.WriteLine("Serial Close Error.");
+
+                return false;
             }
         }
 
@@ -160,20 +183,28 @@ namespace CsTJMonster
             if (obj.IsOpen)
             {
                 close_serial();
-                scan_valid_serial();
                 button_OpenCOM.BackColor = color_disable;
                 button_OpenCOM.Text = "Open";
-                button5.BackColor = color_disable;
+                button_Scan.Enabled = true;
                 timer1.Enabled = false;
             }
             else
             {
-                scan_valid_serial();
                 open_serial();
-                button_OpenCOM.BackColor = color_enable;
-                button_OpenCOM.Text = "Close";
-                button5.BackColor = color_enable;
-                timer1.Enabled = true;
+                if (obj.IsOpen)
+                {
+                    button_OpenCOM.BackColor = color_enable;
+                    button_OpenCOM.Text = "Close";
+                    button_Scan.Enabled = false;
+                    timer1.Enabled = true;
+                }
+                else
+                {
+                    button_OpenCOM.BackColor = color_disable;
+                    button_OpenCOM.Text = "Open Failed\r\nScan";
+                    button_Scan.Enabled = true;
+                    timer1.Enabled = false;
+                }
             }
         }
 
@@ -277,23 +308,29 @@ namespace CsTJMonster
 
         private void button3_Click(object sender, EventArgs e)
         {
-            data_stream();
+            if (stream_en)
+            {
+                stream_en = false;
+                button3.Text = "Stream";
+                button3.BackColor = color_disable;
+            }
+            else
+            {
+                stream_en = true;
+                button3.Text = "Streaming";
+                button3.BackColor = color_enable;
+            }
             System.Media.SystemSounds.Asterisk.Play();
-        }
-
-        private void button4_Click(object sender, EventArgs e)
-        {
-            chart_update();
         }
 
         private void chart_update()
         {
-            chart1.Series[0].Points.Clear();
             Series RX_stream = new Series("RX_stream");
             byte[] data = RX_Buffer.ToArray();
 
             if (data.Length!=0)
             {
+                chart1.Series[0].Points.Clear();
                 int[] tmp = new int[7] ;
                 for(int i = 0; i < 7; i++)
                 {
@@ -306,19 +343,13 @@ namespace CsTJMonster
                 RX_stream.Points.AddXY("accx", tmp[0].ToString());
                 RX_stream.Points.AddXY("accy", tmp[1].ToString());
                 RX_stream.Points.AddXY("accz", tmp[2].ToString());
-                RX_stream.Points.AddXY("gyrox", tmp[3].ToString());
-                RX_stream.Points.AddXY("gyroy", tmp[4].ToString());
-                RX_stream.Points.AddXY("gyroz", tmp[5].ToString());
-                RX_stream.Points.AddXY("T", tmp[6].ToString());
-                RX_stream.Points.AddXY("max", "32768");
-                RX_stream.Points.AddXY("min", "-32768");
+                RX_stream.Points.AddXY("gyrox", tmp[4].ToString());
+                RX_stream.Points.AddXY("gyroy", tmp[5].ToString());
+                RX_stream.Points.AddXY("gyroz", tmp[6].ToString());
+                RX_stream.Points.AddXY("T", tmp[3].ToString());
+                RX_stream.IsVisibleInLegend = false;
                 chart1.Series.Add(RX_stream);
             }
-        }
-
-        private void chart1_Click(object sender, EventArgs e)
-        {
-            chart1.BackColor = Color.Beige;
         }
 
         private void update_data_labels()
@@ -345,14 +376,47 @@ namespace CsTJMonster
         
         private void timer1_Tick(object sender, EventArgs e)
         {
+            /*更新数据表*/
             chart_update();
+            /*更新缓冲区*/
             update_data_labels();
+            /*更新状态栏*/
             status_update();
-            data_stream();
+            /*发起数据请求*/
+            if (stream_en)
+            {
+                data_stream();
+            }
+            /*清空发送区*/
             if (textBox1.Text.Length > 256)
             {
                 textBox1.Text = "";
             }
+        }
+
+        private void button_Scan_Click(object sender, EventArgs e)
+        {
+            int valid_COM_cnt = 0;
+            valid_COM_cnt = scan_valid_serial();
+            groupBox2.Text = valid_COM_cnt.ToString() + " COMs";
+        }
+
+        private void rate_speed_Tick(object sender, EventArgs e)
+        {
+            if (rate_speed_counter * 4 < 16)
+            {
+                groupBox1.Text = "RX rate: " + (rate_speed_counter *4 * 8 ).ToString() + " bps";
+            }
+            else if (rate_speed_counter * 4 < 1024)
+            {
+                groupBox1.Text = "RX rate: " + (rate_speed_counter * 4).ToString() + " Bps";
+            }
+            else if (rate_speed_counter * 4 < 1024 * 1024)
+            {
+                float rate_kBps = (float)rate_speed_counter * 4 / 1024;
+                groupBox1.Text = "RX rate: " + rate_kBps.ToString("F2") + " kBps";
+            }
+            rate_speed_counter = 0;
         }
         
     }
