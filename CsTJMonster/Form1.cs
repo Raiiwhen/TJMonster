@@ -27,7 +27,8 @@ namespace CsTJMonster
         bool Stream_EN = false;//使能定时器1
         Bitmap Stream_Vec;//绘图区的bitmap位图
         Graphics Stream_VecG;//上述bitmap位图的绘图板
-        Form form_FFT;
+        Form2 form_FFT;//z子窗体，显示数据的傅里叶值
+        Array currenrCOM;
         /*debug变量*/
         int db_x, db_y;
 
@@ -62,9 +63,9 @@ namespace CsTJMonster
             Stream_VecG = Graphics.FromImage(Stream_Vec);
             Stream_VecG.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             /*串口扫描和初始化*/
-            int valid_COM_cnt = Serial_scan();
+            int valid_COM_cnt = COM_scan();
             groupBox2.Text = valid_COM_cnt.ToString() + " COMs";
-            Serial_open();
+            COM_open();
             if (obj.IsOpen)
             {
                 /*开始工作*/
@@ -85,7 +86,7 @@ namespace CsTJMonster
         }
 
         /*串口操作与数据收发函数*/
-        private void port_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        private void COM_RxHandler(object sender, SerialDataReceivedEventArgs e)
         {
             SerialPort sp = obj;
             byte[] buffer = new byte[sp.BytesToRead];
@@ -110,7 +111,7 @@ namespace CsTJMonster
             textBox1.AppendText(str);
         }
 
-        private int Serial_scan()
+        private int COM_scan()
         {
             string[] com_list = new string[5] { "-", "-", "-", "-", "-", };
 
@@ -128,7 +129,7 @@ namespace CsTJMonster
             return str.Count();
         }
 
-        private bool Serial_open()
+        private bool COM_open()
         {
             string current_port = "COM3";
 
@@ -148,7 +149,7 @@ namespace CsTJMonster
                 obj.Handshake = Handshake.None;
                 obj.RtsEnable = true;
                 /*注册串口事件*/
-                obj.DataReceived += new SerialDataReceivedEventHandler(port_DataReceived);
+                obj.DataReceived += new SerialDataReceivedEventHandler(COM_RxHandler);
                 /*开串口*/
                 obj.Open();
 
@@ -160,7 +161,7 @@ namespace CsTJMonster
             }
         }
 
-        private bool Serial_close()
+        private bool COM_close()
         {
             try
             {
@@ -330,7 +331,7 @@ namespace CsTJMonster
                 {
                     raw[i] = data[2 * i] * 256 + data[2 * i + 1];
                     raw[i] = raw[i] > 32678 ? raw[i] - 65536 : raw[i];
-                    acc[i] = Convert.ToDouble(raw[i])/ 56756 * Stream_Vec.Height;//矢量模长，归一化到画布高度的1/5
+                    acc[i] = Convert.ToDouble(raw[i])/ 56756 * Stream_Vec.Width;//矢量模长，归一化到画布高度的1/5
                 }
                 deg = System.Math.Atan(acc[0] / acc[1]);
                 abs = System.Math.Sqrt(System.Math.Pow(acc[0], 2) + System.Math.Pow(acc[1], 2));//加速度的模（单位: 2.828 g）
@@ -344,7 +345,7 @@ namespace CsTJMonster
                 Stream_VecG.DrawLine(p, ep, sp);
 
                 pictureBox1.Image = Stream_Vec;
-                groupBox3.Text = (abs * 2.828 * 9.8 / Stream_Vec.Height).ToString();
+                groupBox3.Text = (abs * 2.828 * 9.8 / Stream_Vec.Width).ToString("F2");
             }
             catch
             {
@@ -398,7 +399,7 @@ namespace CsTJMonster
         private void button_Scan_Click(object sender, EventArgs e)
         {
             int valid_COM_cnt = 0;
-            valid_COM_cnt = Serial_scan();
+            valid_COM_cnt = COM_scan();
             groupBox2.Text = valid_COM_cnt.ToString() + " COMs";
         }
         
@@ -438,14 +439,14 @@ namespace CsTJMonster
         {
             if (obj.IsOpen)
             {
-                Serial_close();
+                COM_close();
                 button_OpenCOM.BackColor = color_disable;
                 button_OpenCOM.Text = "Open";
                 timer1.Enabled = false;
             }
             else
             {
-                Serial_open();
+                COM_open();
                 if (obj.IsOpen)
                 {
                     button_OpenCOM.BackColor = color_enable;
@@ -464,7 +465,13 @@ namespace CsTJMonster
 
         private void button5_Click(object sender, EventArgs e)
         {
-
+            COM_close();
+            button_OpenCOM.BackColor = color_disable;
+            button_OpenCOM.Text = "Open";
+            timer1.Enabled = false;
+            
+            form_FFT = new Form2(obj);
+            form_FFT.ShowDialog(); 
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -478,6 +485,11 @@ namespace CsTJMonster
                 button_Sync.BackColor = color_disable;
             }
             Status_cmd();
+        }
+
+        public float get_data()
+        {
+            return 100;
         }
     }
 }
