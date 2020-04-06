@@ -23,10 +23,12 @@ namespace CsTJMonster
         Color color_disable = Color.LightGray;//几种颜色定义
         Color color_enable = Color.PaleTurquoise;
         Color color_error = Color.Lime;
-        int rate_speed_counter;//定时器2使用的变量，用于统计数据上下行速率
-        bool stream_en = false;//使能定时器1
-        Bitmap trace;//绘图区的bitmap位图
-        Graphics trace_grp;//上述bitmap位图的绘图板
+        int RX_RATE_CNTER;//定时器2使用的变量，用于统计数据上下行速率
+        bool Stream_EN = false;//使能定时器1
+        Bitmap Stream_Vec;//绘图区的bitmap位图
+        Graphics Stream_VecG;//上述bitmap位图的绘图板
+        Form form_FFT;
+        /*debug变量*/
         int db_x, db_y;
 
         public Form1()
@@ -56,8 +58,9 @@ namespace CsTJMonster
             chart1.ChartAreas[0].AxisY.Maximum = 32768;
             chart1.ChartAreas[0].AxisY.Minimum = -32768;
             /*绘图imagine初始化*/
-            trace = new Bitmap(pictureBox1.Width,pictureBox1.Height);
-            trace_grp = Graphics.FromImage(trace);
+            Stream_Vec = new Bitmap(pictureBox1.Width,pictureBox1.Height);
+            Stream_VecG = Graphics.FromImage(Stream_Vec);
+            Stream_VecG.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             /*串口扫描和初始化*/
             int valid_COM_cnt = Serial_scan();
             groupBox2.Text = valid_COM_cnt.ToString() + " COMs";
@@ -68,18 +71,16 @@ namespace CsTJMonster
                 timer1.Enabled = true;
                 button_OpenCOM.BackColor = color_enable;
                 button_OpenCOM.Text = "Close";
-                button_Scan.Enabled = false;
                 button3.BackColor = color_enable;
                 button3.Text = "数据流\r\ning";
                 Status_cmd();
-                stream_en = true;
+                Stream_EN = true;
             }
             else
             {
                 timer1.Enabled = false;
                 button_OpenCOM.BackColor = color_disable;
                 button_OpenCOM.Text = "Open";
-                button_Scan.Enabled = true;
             }
         }
 
@@ -92,7 +93,7 @@ namespace CsTJMonster
             {
                 sp.Read(buffer, 0, sp.BytesToRead);
                 RX_Buffer.AddRange(buffer);
-                rate_speed_counter += buffer.Length;
+                RX_RATE_CNTER += buffer.Length;
             }
             catch
             {
@@ -112,34 +113,19 @@ namespace CsTJMonster
         private int Serial_scan()
         {
             string[] com_list = new string[5] { "-", "-", "-", "-", "-", };
-            string buffer;
-            int valid_cnt = -1;
-            for (int i = 0; i < 20; i++)
+
+            string[] str = SerialPort.GetPortNames();
+            for(int i = 0; i < str.Count() && i < com_list.Count(); i++)
             {
-                try
-                {
-                    buffer = "COM" + i.ToString();
-                    SerialPort scan_COM = new SerialPort();
-                    scan_COM.PortName = buffer;
-                    scan_COM.Open();
-                    scan_COM.Close();
-                    Console.WriteLine(buffer);
-                    if (valid_cnt++ < 5)
-                    {
-                        com_list[valid_cnt] = buffer;
-                    }
-                }
-                catch
-                {
-                    continue;
-                }
+                com_list[i] = str[i];
             }
+            
             radioButton1.Text = com_list[0]; radioButton1.Enabled = com_list[0] == "-" ? false : true;
             radioButton2.Text = com_list[1]; radioButton2.Enabled = com_list[1] == "-" ? false : true;
             radioButton3.Text = com_list[2]; radioButton3.Enabled = com_list[2] == "-" ? false : true;
             radioButton4.Text = com_list[3]; radioButton4.Enabled = com_list[3] == "-" ? false : true;
 
-            return valid_cnt + 1;
+            return str.Count();
         }
 
         private bool Serial_open()
@@ -189,8 +175,7 @@ namespace CsTJMonster
                 return false;
             }
         }
-
-
+        
         /*数据编解码与显示*/
         private void Status_cmd()
         {
@@ -270,33 +255,40 @@ namespace CsTJMonster
 
         private void Stream_update_label()
         {
-            byte[] watch_buffer = RX_Buffer.ToArray();
-            int cnt = watch_buffer.Length;
             string str = "00 ";
 
-            label1.Text = "";
-            for (int i= 0; i<128; i++)
+            try
             {
-                if (i < cnt)
+                byte[] watch_buffer = RX_Buffer.ToArray();
+                int cnt = watch_buffer.Length;
+                label1.Text = "";
+                for (int i = 0; i < 128; i++)
                 {
-                    str = BitConverter.ToString(BitConverter.GetBytes(watch_buffer[i]));
-                    label1.Text += str.Substring(0, 2);
-                    label1.Text += ' ';
+                    if (i < cnt)
+                    {
+                        str = BitConverter.ToString(BitConverter.GetBytes(watch_buffer[i]));
+                        label1.Text += str.Substring(0, 2);
+                        label1.Text += ' ';
+                    }
+                    else
+                    {
+                        label1.Text += "00 ";
+                    }
                 }
-                else
-                {
-                    label1.Text += "00 ";
-                }
+            }
+            catch
+            {
+
             }
         }
 
         private void Stream_update_chart()
         {
             Series RX_stream = new Series("RX_stream");
-            List<byte> chart_buffer = new List<byte>(RX_Buffer.ToArray());
-            byte[] data = chart_buffer.ToArray();
             try
             {
+                List<byte> chart_buffer = new List<byte>(RX_Buffer.ToArray());
+                byte[] data = chart_buffer.ToArray();
                 chart1.Series[0].Points.Clear();
                 int[] tmp = new int[7] ;
                 for(int i = 0; i < 7; i++)
@@ -323,25 +315,36 @@ namespace CsTJMonster
             }
         }
 
-        private void Stream_update_vector()
+        private void Stream_update_vectorBox()
         {
             try
             {
                 List<byte> vector_buffer = new List<byte>(RX_Buffer.ToArray());
                 byte[] data = vector_buffer.ToArray();
-                int[] acc = new int[3];
-                double tmp = 0;
+                int[] raw = new int[3];
+                double[] acc = new double[] { 0,0,0};
+                double deg = 0, abs = 0;
+                Point sp, ep;
+
                 for (int i = 0; i < 3; i++)
                 {
-                    acc[i] = data[2 * i] * 256 + data[2 * i + 1];
-                    acc[i] = acc[i] > 32678 ? acc[i] - 65536 : acc[i];
-                    tmp += acc[i] * acc[i];
+                    raw[i] = data[2 * i] * 256 + data[2 * i + 1];
+                    raw[i] = raw[i] > 32678 ? raw[i] - 65536 : raw[i];
+                    acc[i] = Convert.ToDouble(raw[i])/ 56756 * Stream_Vec.Height;//矢量模长，归一化到画布高度的1/5
                 }
-                tmp = System.Math.Sqrt(System.Math.Abs(tmp)) / 56756 * trace.Height; //归一化到画布高度
+                deg = System.Math.Atan(acc[0] / acc[1]);
+                abs = System.Math.Sqrt(System.Math.Pow(acc[0], 2) + System.Math.Pow(acc[1], 2));//加速度的模（单位: 2.828 g）
 
-                trace_grp.FillRectangle(Brushes.White, 0, 0, 10, trace.Height);
-                trace_grp.FillRectangle(Brushes.Red, 0, 0, 10, Convert.ToInt32(tmp));
-                pictureBox1.Image = trace;
+                Pen p = new Pen(Color.Red, 2);
+                p.StartCap = System.Drawing.Drawing2D.LineCap.ArrowAnchor;
+                p.EndCap = System.Drawing.Drawing2D.LineCap.RoundAnchor;
+                sp = new Point(Stream_Vec.Width/2, Stream_Vec.Height/2);
+                ep = sp + new Size(Convert.ToInt32(abs * System.Math.Cos(deg)), Convert.ToInt32(abs * System.Math.Sin(deg)));
+                Stream_VecG.Clear(color_enable);
+                Stream_VecG.DrawLine(p, ep, sp);
+
+                pictureBox1.Image = Stream_Vec;
+                groupBox3.Text = (abs * 2.828 * 9.8 / Stream_Vec.Height).ToString();
             }
             catch
             {
@@ -354,7 +357,7 @@ namespace CsTJMonster
         {
             /*更新数据表*/
             Stream_update_chart();
-            Stream_update_vector();
+            Stream_update_vectorBox();
             /*更新缓冲区*/
             Stream_update_label();
             /*更新状态栏*/
@@ -362,7 +365,7 @@ namespace CsTJMonster
             /*绘制轨迹*/
             pictureBox1.Refresh();
             /*发起数据请求*/
-            if (stream_en)
+            if (Stream_EN)
             {
                 Stream_cmd();
             }
@@ -375,20 +378,20 @@ namespace CsTJMonster
 
         private void rate_speed_Tick(object sender, EventArgs e)
         {
-            if (rate_speed_counter * 4 < 16)
+            if (RX_RATE_CNTER * 4 < 16)
             {
-                groupBox1.Text = "RX rate: " + (rate_speed_counter * 4 * 8).ToString() + " bps";
+                groupBox1.Text = "RX rate: " + (RX_RATE_CNTER * 4 * 8).ToString() + " bps";
             }
-            else if (rate_speed_counter * 4 < 1024)
+            else if (RX_RATE_CNTER * 4 < 1024)
             {
-                groupBox1.Text = "RX rate: " + (rate_speed_counter * 4).ToString() + " Bps";
+                groupBox1.Text = "RX rate: " + (RX_RATE_CNTER * 4).ToString() + " Bps";
             }
-            else if (rate_speed_counter * 4 < 1024 * 1024)
+            else if (RX_RATE_CNTER * 4 < 1024 * 1024)
             {
-                float rate_kBps = (float)rate_speed_counter * 4 / 1024;
+                float rate_kBps = (float)RX_RATE_CNTER * 4 / 1024;
                 groupBox1.Text = "RX rate: " + rate_kBps.ToString("F2") + " kBps";
             }
-            rate_speed_counter = 0;
+            RX_RATE_CNTER = 0;
         }
 
         /*按键驱动逻辑*/
@@ -398,38 +401,33 @@ namespace CsTJMonster
             valid_COM_cnt = Serial_scan();
             groupBox2.Text = valid_COM_cnt.ToString() + " COMs";
         }
-
-        private void button5_Click(object sender, EventArgs e)
-        {
-            Stream_update_vector();
-        }
-
+        
         private void button4_Click(object sender, EventArgs e)
         {
             int red = 0;
             int white = 11;
             while (white <= 100)
             {
-                trace_grp.FillRectangle(Brushes.DeepSkyBlue, 0, red + db_y, 200, 10);
-                trace_grp.FillRectangle(Brushes.White, 0, white + db_y, 200, 10);
+                Stream_VecG.FillRectangle(Brushes.DeepSkyBlue, 0, red + db_y, 200, 10);
+                Stream_VecG.FillRectangle(Brushes.White, 0, white + db_y, 200, 10);
                 red += 20;
                 white += 20;
             }
             db_y += 130;
-            pictureBox1.Image = trace;
+            pictureBox1.Image = Stream_Vec;
         }
         
         private void button3_Click(object sender, EventArgs e)
         {
-            if (stream_en)
+            if (Stream_EN)
             {
-                stream_en = false;
+                Stream_EN = false;
                 button3.Text = "数据流";
                 button3.BackColor = color_disable;
             }
             else
             {
-                stream_en = true;
+                Stream_EN = true;
                 button3.Text = "数据流\r\ning";
                 button3.BackColor = color_enable;
             }
@@ -443,7 +441,6 @@ namespace CsTJMonster
                 Serial_close();
                 button_OpenCOM.BackColor = color_disable;
                 button_OpenCOM.Text = "Open";
-                button_Scan.Enabled = true;
                 timer1.Enabled = false;
             }
             else
@@ -453,7 +450,6 @@ namespace CsTJMonster
                 {
                     button_OpenCOM.BackColor = color_enable;
                     button_OpenCOM.Text = "Close";
-                    button_Scan.Enabled = false;
                     timer1.Enabled = true;
                 }
                 else
@@ -464,6 +460,11 @@ namespace CsTJMonster
                     timer1.Enabled = false;
                 }
             }
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+
         }
 
         private void button2_Click(object sender, EventArgs e)
