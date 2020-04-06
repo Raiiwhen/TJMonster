@@ -29,9 +29,9 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea4 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend4 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.button_OpenCOM = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.serialPort1 = new System.IO.Ports.SerialPort(this.components);
@@ -53,16 +53,19 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.radioButton5 = new System.Windows.Forms.RadioButton();
             this.radioButton4 = new System.Windows.Forms.RadioButton();
             this.radioButton1 = new System.Windows.Forms.RadioButton();
             this.radioButton2 = new System.Windows.Forms.RadioButton();
             this.radioButton3 = new System.Windows.Forms.RadioButton();
             this.rate_speed = new System.Windows.Forms.Timer(this.components);
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            this.groupBox3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // button_OpenCOM
@@ -71,7 +74,7 @@
             this.button_OpenCOM.Location = new System.Drawing.Point(17, 12);
             this.button_OpenCOM.Name = "button_OpenCOM";
             this.button_OpenCOM.Size = new System.Drawing.Size(111, 83);
-            this.button_OpenCOM.TabIndex = 5;
+            this.button_OpenCOM.TabIndex = 6;
             this.button_OpenCOM.Text = "Open";
             this.button_OpenCOM.UseVisualStyleBackColor = false;
             this.button_OpenCOM.Click += new System.EventHandler(this.button1_Click);
@@ -82,9 +85,8 @@
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox1.Size = new System.Drawing.Size(553, 360);
+            this.textBox1.Size = new System.Drawing.Size(250, 360);
             this.textBox1.TabIndex = 6;
-            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // label1
             // 
@@ -100,62 +102,64 @@
             this.comboBox1.Location = new System.Drawing.Point(17, 97);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(111, 23);
-            this.comboBox1.TabIndex = 8;
+            this.comboBox1.TabIndex = 5;
             // 
             // button_Sync
             // 
-            this.button_Sync.Location = new System.Drawing.Point(268, 6);
+            this.button_Sync.Location = new System.Drawing.Point(268, 12);
             this.button_Sync.Name = "button_Sync";
-            this.button_Sync.Size = new System.Drawing.Size(48, 44);
-            this.button_Sync.TabIndex = 9;
-            this.button_Sync.Text = "sync";
+            this.button_Sync.Size = new System.Drawing.Size(68, 57);
+            this.button_Sync.TabIndex = 7;
+            this.button_Sync.Text = "同步";
             this.button_Sync.UseVisualStyleBackColor = true;
             this.button_Sync.Click += new System.EventHandler(this.button2_Click);
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(321, 6);
+            this.button3.Location = new System.Drawing.Point(336, 12);
             this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(48, 44);
-            this.button3.TabIndex = 10;
-            this.button3.Text = "Stream";
+            this.button3.Size = new System.Drawing.Size(68, 57);
+            this.button3.TabIndex = 8;
+            this.button3.Text = "数据流";
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(374, 6);
+            this.button4.Location = new System.Drawing.Point(404, 12);
             this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(48, 44);
-            this.button4.TabIndex = 11;
-            this.button4.Text = "draw";
+            this.button4.Size = new System.Drawing.Size(68, 57);
+            this.button4.TabIndex = 9;
+            this.button4.Text = "蓝白碗";
             this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
             // button5
             // 
-            this.button5.Location = new System.Drawing.Point(427, 6);
+            this.button5.Location = new System.Drawing.Point(472, 12);
             this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(48, 44);
-            this.button5.TabIndex = 12;
-            this.button5.Text = "bt5";
+            this.button5.Size = new System.Drawing.Size(68, 57);
+            this.button5.TabIndex = 10;
+            this.button5.Text = "矢量";
             this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
             // 
             // button6
             // 
-            this.button6.Location = new System.Drawing.Point(480, 6);
+            this.button6.Location = new System.Drawing.Point(540, 12);
             this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(48, 44);
-            this.button6.TabIndex = 13;
+            this.button6.Size = new System.Drawing.Size(68, 57);
+            this.button6.TabIndex = 11;
             this.button6.Text = "bt6";
             this.button6.UseVisualStyleBackColor = true;
             // 
             // button_Scan
             // 
             this.button_Scan.Enabled = false;
-            this.button_Scan.Location = new System.Drawing.Point(66, 38);
+            this.button_Scan.Location = new System.Drawing.Point(66, 19);
             this.button_Scan.Name = "button_Scan";
-            this.button_Scan.Size = new System.Drawing.Size(56, 63);
-            this.button_Scan.TabIndex = 14;
+            this.button_Scan.Size = new System.Drawing.Size(56, 82);
+            this.button_Scan.TabIndex = 0;
             this.button_Scan.Text = "Scan";
             this.button_Scan.UseVisualStyleBackColor = true;
             this.button_Scan.Click += new System.EventHandler(this.button_Scan_Click);
@@ -171,7 +175,7 @@
             this.toolStripStatusLabel5});
             this.statusStrip1.Location = new System.Drawing.Point(0, 581);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(1094, 25);
+            this.statusStrip1.Size = new System.Drawing.Size(936, 25);
             this.statusStrip1.TabIndex = 15;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -208,17 +212,17 @@
             // 
             // chart1
             // 
-            chartArea2.Name = "ChartArea1";
-            this.chart1.ChartAreas.Add(chartArea2);
-            legend2.Name = "Legend1";
-            this.chart1.Legends.Add(legend2);
-            this.chart1.Location = new System.Drawing.Point(571, 6);
+            chartArea4.Name = "ChartArea1";
+            this.chart1.ChartAreas.Add(chartArea4);
+            legend4.Name = "Legend1";
+            this.chart1.Legends.Add(legend4);
+            this.chart1.Location = new System.Drawing.Point(268, 75);
             this.chart1.Name = "chart1";
-            series2.ChartArea = "ChartArea1";
-            series2.Legend = "Legend1";
-            series2.Name = "Series1";
-            this.chart1.Series.Add(series2);
-            this.chart1.Size = new System.Drawing.Size(515, 480);
+            series4.ChartArea = "ChartArea1";
+            series4.Legend = "Legend1";
+            series4.Name = "Series1";
+            this.chart1.Series.Add(series4);
+            this.chart1.Size = new System.Drawing.Size(340, 411);
             this.chart1.TabIndex = 16;
             this.chart1.Text = "chart1";
             // 
@@ -239,7 +243,6 @@
             // 
             // groupBox2
             // 
-            this.groupBox2.Controls.Add(this.radioButton5);
             this.groupBox2.Controls.Add(this.radioButton4);
             this.groupBox2.Controls.Add(this.radioButton1);
             this.groupBox2.Controls.Add(this.radioButton2);
@@ -252,23 +255,13 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "No COM";
             // 
-            // radioButton5
-            // 
-            this.radioButton5.AutoSize = true;
-            this.radioButton5.Location = new System.Drawing.Point(66, 19);
-            this.radioButton5.Name = "radioButton5";
-            this.radioButton5.Size = new System.Drawing.Size(36, 19);
-            this.radioButton5.TabIndex = 4;
-            this.radioButton5.Text = "-";
-            this.radioButton5.UseVisualStyleBackColor = true;
-            // 
             // radioButton4
             // 
             this.radioButton4.AutoSize = true;
             this.radioButton4.Location = new System.Drawing.Point(6, 76);
             this.radioButton4.Name = "radioButton4";
             this.radioButton4.Size = new System.Drawing.Size(36, 19);
-            this.radioButton4.TabIndex = 3;
+            this.radioButton4.TabIndex = 4;
             this.radioButton4.Text = "-";
             this.radioButton4.UseVisualStyleBackColor = true;
             // 
@@ -279,7 +272,7 @@
             this.radioButton1.Location = new System.Drawing.Point(6, 19);
             this.radioButton1.Name = "radioButton1";
             this.radioButton1.Size = new System.Drawing.Size(36, 19);
-            this.radioButton1.TabIndex = 0;
+            this.radioButton1.TabIndex = 1;
             this.radioButton1.TabStop = true;
             this.radioButton1.Text = "-";
             this.radioButton1.UseVisualStyleBackColor = true;
@@ -290,7 +283,7 @@
             this.radioButton2.Location = new System.Drawing.Point(6, 38);
             this.radioButton2.Name = "radioButton2";
             this.radioButton2.Size = new System.Drawing.Size(36, 19);
-            this.radioButton2.TabIndex = 1;
+            this.radioButton2.TabIndex = 2;
             this.radioButton2.Text = "-";
             this.radioButton2.UseVisualStyleBackColor = true;
             // 
@@ -300,7 +293,7 @@
             this.radioButton3.Location = new System.Drawing.Point(6, 57);
             this.radioButton3.Name = "radioButton3";
             this.radioButton3.Size = new System.Drawing.Size(36, 19);
-            this.radioButton3.TabIndex = 2;
+            this.radioButton3.TabIndex = 3;
             this.radioButton3.Text = "-";
             this.radioButton3.UseVisualStyleBackColor = true;
             // 
@@ -310,11 +303,30 @@
             this.rate_speed.Interval = 250;
             this.rate_speed.Tick += new System.EventHandler(this.rate_speed_Tick);
             // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.pictureBox1);
+            this.groupBox3.Location = new System.Drawing.Point(614, 12);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(271, 471);
+            this.groupBox3.TabIndex = 19;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Draw Zone";
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Location = new System.Drawing.Point(6, 16);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(259, 449);
+            this.pictureBox1.TabIndex = 0;
+            this.pictureBox1.TabStop = false;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1094, 606);
+            this.ClientSize = new System.Drawing.Size(936, 606);
+            this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.chart1);
@@ -336,6 +348,8 @@
             this.groupBox1.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -364,12 +378,13 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.RadioButton radioButton5;
         private System.Windows.Forms.RadioButton radioButton4;
         private System.Windows.Forms.RadioButton radioButton1;
         private System.Windows.Forms.RadioButton radioButton2;
         private System.Windows.Forms.RadioButton radioButton3;
         private System.Windows.Forms.Timer rate_speed;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.PictureBox pictureBox1;
     }
 }
 
