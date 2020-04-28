@@ -10,6 +10,14 @@ using System.Windows.Forms;
 using System.IO.Ports;
 using System.Windows.Forms.DataVisualization.Charting;
 
+/*指令集
+ 08 0a 0d 同步状态信息
+ 09 0a 0d 请求数据流(定长无头尾128bytes)
+ 0a 0a 0d 子窗体，开启连续发送(实时，无误码)
+ 0b 0a 0d 子窗体，关闭连续发送
+ 0c 0a 0d 清零积分指令
+     */
+
 
 
 namespace CsTJMonster
@@ -28,7 +36,6 @@ namespace CsTJMonster
         Bitmap Stream_Vec;//绘图区的bitmap位图
         Graphics Stream_VecG;//上述bitmap位图的绘图板
         Form2 form_FFT;//z子窗体，显示数据的傅里叶值
-        Array currenrCOM;
         /*debug变量*/
         int db_x, db_y;
 
@@ -176,7 +183,7 @@ namespace CsTJMonster
                 return false;
             }
         }
-        
+
         /*数据编解码与显示*/
         private void Status_cmd()
         {
@@ -189,6 +196,21 @@ namespace CsTJMonster
             else
             {
                 cput("> Echo error. Serial Closed.\r\n");
+            }
+        }
+
+        /*清零指令*/
+        private void Stream_RST_cmd()
+        {
+            byte[] mst_echo = new byte[3] { 0x0c, 0x0a, 0x0d };
+            if (obj.IsOpen)
+            {
+                obj.Write(mst_echo, 0, 3);
+                cput("> 重设积分\r\n");
+            }
+            else
+            {
+                cput("> 重设失败，Serial Closed.\r\n");
             }
         }
 
@@ -487,6 +509,11 @@ namespace CsTJMonster
             Status_cmd();
         }
 
+        private void button6_Click(object sender, EventArgs e)
+        {
+            Stream_RST_cmd();
+        }
+        
         public float get_data()
         {
             return 100;

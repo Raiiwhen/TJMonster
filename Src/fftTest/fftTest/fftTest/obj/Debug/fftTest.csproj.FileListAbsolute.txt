@@ -1,0 +1,8 @@
+D:\CsTJMonstor\Src\fftTest\fftTest\fftTest\bin\Debug\fftTest.exe
+D:\CsTJMonstor\Src\fftTest\fftTest\fftTest\bin\Debug\fftTest.pdb
+D:\CsTJMonstor\Src\fftTest\fftTest\fftTest\obj\Debug\fftTest.csprojResolveAssemblyReference.cache
+D:\CsTJMonstor\Src\fftTest\fftTest\fftTest\obj\Debug\fftTest.Form1.resources
+D:\CsTJMonstor\Src\fftTest\fftTest\fftTest\obj\Debug\fftTest.Properties.Resources.resources
+D:\CsTJMonstor\Src\fftTest\fftTest\fftTest\obj\Debug\fftTest.csproj.GenerateResource.Cache
+D:\CsTJMonstor\Src\fftTest\fftTest\fftTest\obj\Debug\fftTest.exe
+D:\CsTJMonstor\Src\fftTest\fftTest\fftTest\obj\Debug\fftTest.pdb
