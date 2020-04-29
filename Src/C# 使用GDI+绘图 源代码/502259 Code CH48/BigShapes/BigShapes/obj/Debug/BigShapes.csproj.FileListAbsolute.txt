@@ -1,0 +1,8 @@
+D:\CsTJMonstor\Src\C# 使用GDI+绘图 源代码\502259 Code CH48\BigShapes\BigShapes\bin\Debug\BigShapes.exe
+D:\CsTJMonstor\Src\C# 使用GDI+绘图 源代码\502259 Code CH48\BigShapes\BigShapes\bin\Debug\BigShapes.pdb
+D:\CsTJMonstor\Src\C# 使用GDI+绘图 源代码\502259 Code CH48\BigShapes\BigShapes\obj\Debug\BigShapes.csprojResolveAssemblyReference.cache
+D:\CsTJMonstor\Src\C# 使用GDI+绘图 源代码\502259 Code CH48\BigShapes\BigShapes\obj\Debug\BigShapes.Form1.resources
+D:\CsTJMonstor\Src\C# 使用GDI+绘图 源代码\502259 Code CH48\BigShapes\BigShapes\obj\Debug\BigShapes.Properties.Resources.resources
+D:\CsTJMonstor\Src\C# 使用GDI+绘图 源代码\502259 Code CH48\BigShapes\BigShapes\obj\Debug\BigShapes.csproj.GenerateResource.Cache
+D:\CsTJMonstor\Src\C# 使用GDI+绘图 源代码\502259 Code CH48\BigShapes\BigShapes\obj\Debug\BigShapes.exe
+D:\CsTJMonstor\Src\C# 使用GDI+绘图 源代码\502259 Code CH48\BigShapes\BigShapes\obj\Debug\BigShapes.pdb

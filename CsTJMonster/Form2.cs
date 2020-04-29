@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO.Ports;
+using System.Threading;
 
 namespace CsTJMonster
 {
@@ -15,13 +16,15 @@ namespace CsTJMonster
     {
         SerialPort obj;
         /*数据分析*/
-        List<byte> RX_Buffer;
-        List<byte> sample_pkgs;
-        List<float> samples;
+        List<byte> RX_Buffer;//串口缓存
+        List<byte> sample_pkgs;//串口缓存->数据解析的中间容器
+        List<float> fft_raw;//实时滑动的数据存储，包括最近4096个数据
+        List<float> data_raw;//全体采样数据容器，随时间加宽
         int err_count;
         byte[] pkg;
         int RX_RATE_CNTER;
         /*UI绘图*/
+        Bitmap draw_zone;
         Graphics g_rt;
         Plot rt;
         Pen p;
@@ -30,15 +33,15 @@ namespace CsTJMonster
         Color color_disable = Color.LightGray;//几种颜色定义
         Color color_enable = Color.PaleTurquoise;
         Color color_error = Color.Lime;
-        Color color_point = Color.Lime;
 
         public Form2(SerialPort father_COM)
         {
             InitializeComponent();
             System.Windows.Forms.Control.CheckForIllegalCrossThreadCalls = false;
 
-            obj = new SerialPort();
 
+
+            obj = new SerialPort();
             obj.PortName = father_COM.PortName;
             obj.BaudRate = father_COM.BaudRate;
             obj.Parity = Parity.None;
@@ -56,7 +59,7 @@ namespace CsTJMonster
             /*在2s内产生的数据*/
             RX_Buffer = new List<byte>(8192);
             sample_pkgs = new List<byte>(8192);
-            samples = new List<float>(8192);
+            fft_raw = new List<float>(8192);
             pkg = new byte[104];
             try
             {
@@ -64,6 +67,10 @@ namespace CsTJMonster
                 obj.DiscardInBuffer();
                 obj.DiscardOutBuffer();
                 RX_Buffer.Clear();
+                byte[] shutdown = { 0x0b, 0x0a, 0x0d };
+                obj.Write(shutdown, 0, shutdown.Length);
+                Thread.Sleep(10);
+                
                 byte[] cmd = { 0x0a, 0x0a, 0x0d };
                 obj.Write(cmd, 0, cmd.Length);
                 timer1.Enabled = true;
@@ -94,11 +101,13 @@ namespace CsTJMonster
 
         private void Form2_Paint(object sender, PaintEventArgs e)
         {
-            g_rt = this.CreateGraphics();
+            draw_zone = new Bitmap(pictureBox1.Width, pictureBox1.Height);
+            g_rt = Graphics.FromImage(draw_zone);
+            g_rt.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             rt = new Plot(new Point(10,10), new Size(512,256),32677,-32678);
-            p = new Pen(color_point,2);
-            p_axis = new Pen(Color.RoyalBlue, 2);
-            p_grid = new Pen(Color.LightSteelBlue, 1);
+            p = new Pen(Color.RoyalBlue,(float)0.3);
+            p_grid = new Pen(Color.OrangeRed, 1);
+            p_axis = new Pen(Color.Maroon, p_grid.Width+1);
             g_rt_frame(rt);
         }
 
@@ -116,7 +125,7 @@ namespace CsTJMonster
                 sample_pkgs.AddRange(RX_Buffer.GetRange(0,bytes_rdy));
                 RX_Buffer.RemoveRange(0,bytes_rdy);
                 
-                label3.Text = ((float)sample_pkgs.Count() / 104).ToString();
+                label3.Text = ((float)sample_pkgs.Count()/128).ToString("F2");
 
                 //速率显示
                 RX_RATE_CNTER += buffer.Length;
@@ -158,20 +167,43 @@ namespace CsTJMonster
 
         private void g_rt_frame(Plot obj)
         {
-            g_rt.DrawLine(p_axis, obj.dataO(),  obj.dataX()  );
-            g_rt.DrawLine(p_axis, obj.dataO(),  obj.dataX()  );
-            g_rt.DrawLine(p_grid, obj.dataXY(), obj.dataX()  );
-            g_rt.DrawLine(p_grid, obj.dataXY(), obj.dataY()  );
+            int length = (int)(draw_zone.Size.Width - p_grid.Width);
+            int height = (int)(draw_zone.Size.Height - p_grid.Width);
+            g_rt.DrawLine(p_grid, 0,        0,          length,     0           );
+            g_rt.DrawLine(p_grid, length,   0,          length,     height      );
+            g_rt.DrawLine(p_axis, 1,        0,          1,          height-1    );
+            g_rt.DrawLine(p_axis, 1,        height-1,   length,     height-1    );
+            g_rt.DrawLine(p_grid, length,   0,          0,          height      );
+            g_rt.DrawLine(p_grid, 0,        0,          length,     height      );
         }
 
-        private void g_rt_data(Plot obj)
+        private void g_rt_data()
         {
-            for(int cnt=0; cnt < obj.length; cnt++)
+            try
             {
-                int x = (int)((float)cnt / obj.length * samples.Count());
-                int Px = obj.data_Ox + x;
-                int Py = obj.data_Oy - obj.val2y(samples[cnt]);
-                g_rt.DrawLine(p,Px,Py,Px,obj.data_Oy);
+                /*前一个点的y坐标*/
+                int y_last = 0;
+                /*确定画图的数据窗口*/
+                int points_cnt = draw_zone.Width - 2;
+                int index_start = fft_raw.Count() - points_cnt - 1;
+                if (index_start < 0) index_start = 0;
+                /*取数据*/
+                List<float> tmp = fft_raw.GetRange(index_start, points_cnt);
+                /*确定坐标轴的信息*/
+                int y0 = (int)(draw_zone.Height / 2);
+                float k = (float)draw_zone.Height / 4;
+                /*清空重画*/
+                g_rt.Clear(Color.LightGray);
+                /*画图*/
+                for (int x = 0; x < points_cnt; x++)
+                {
+                    int y = (int)(y0 + k * tmp[x]);
+                    g_rt.DrawLine(p, x, (y_last == y ? y - 1 : y_last), x, y);
+                    y_last = y;
+                }
+            }
+            catch
+            {
 
             }
         }
@@ -188,6 +220,7 @@ namespace CsTJMonster
                 byte[] cmd = { 0x0a, 0x0a, 0x0d };
                 obj.Write(cmd, 0, cmd.Length);
                 timer1.Enabled = false;
+                timer3.Enabled = false;
                 button1.Text = "开始采样";
                 button1.BackColor = color_disable;
             }
@@ -196,7 +229,7 @@ namespace CsTJMonster
                 /*开启下位机*/
                 RX_Buffer.Clear();
                 sample_pkgs.Clear();
-                samples.Clear();
+                fft_raw.Clear();
                 Array.Clear(pkg, 0, 104);
                 err_count = 0;
                 label4.Text = "0";
@@ -210,11 +243,8 @@ namespace CsTJMonster
 
         private void button2_Click(object sender, EventArgs e)
         {
-            if (samples.Count() == 4096)
-            {
-                g_rt_data(rt);
-                g_rt_frame(rt);
-            }
+            timer3.Enabled = !timer3.Enabled;
+            button2.Text = "绘图" + (timer3.Enabled?"开":"关");
         }
 
         /*数据解析 40Hz*/
@@ -246,13 +276,14 @@ namespace CsTJMonster
                         data /= 12384;
                         tmp.Add(data);
                     }
-                    samples.AddRange(tmp);
+                    fft_raw.AddRange(tmp);
                     /*固定长度*/
-                    if (samples.Count() > 4096)
+                    if (fft_raw.Count() > 4096)
                     {
-                        samples.RemoveRange(0, samples.Count()-4096);
+                        fft_raw.RemoveRange(0, fft_raw.Count()-4096);
                     }
                 }
+                sample_pkgs.RemoveRange(0,sample_pkgs.Count() - sample_pkgs.Count()%128);
             }
             catch
             {
@@ -264,23 +295,25 @@ namespace CsTJMonster
         /*UI更新 20Hz*/
         private void timer2_Tick(object sender, EventArgs e)
         {
-            int sample_cnt = samples.Count();
+            int sample_cnt = fft_raw.Count();
             /*chart 更新*/
+
             /*buffer 显示*/
             RX_Buffer_Update();
 
             /*label 显示*/
+            label13.Text = (sample_pkgs.Count()/128).ToString("F2");
             label4.Text = err_count.ToString();
-            toolStripProgressBar1.Value = (int)(samples.Count() / 40.96);
+            toolStripProgressBar1.Value = (int)(fft_raw.Count() / 40.96);
             if(sample_cnt>0)
             {
-                label1.Text = samples.Count().ToString();
-                label5.Text = samples.ToArray()[samples.Count() - 1].ToString();
+                label1.Text = fft_raw.Count().ToString();
+                label5.Text = fft_raw.ToArray()[fft_raw.Count() - 1].ToString();
             }
             textBox1.Text = "";
-            for(int i = 0; i < 10 && samples.Count()==4096; i++)
+            for(int i = 0; i < 10 && fft_raw.Count()==4096; i++)
             {
-                textBox1.Text += samples[4086+i].ToString("F2");
+                textBox1.Text += fft_raw[4086+i].ToString("F2");
                 textBox1.Text += " ";
             }
 
@@ -301,7 +334,11 @@ namespace CsTJMonster
             RX_RATE_CNTER = 0;
         }
 
-
+        private void timer3_Tick(object sender, EventArgs e)
+        {
+            g_rt_data();
+            pictureBox1.Image = draw_zone;
+        }
     }
 
     public class Plot

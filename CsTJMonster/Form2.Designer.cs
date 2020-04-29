@@ -54,6 +54,9 @@
             this.label15 = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
+            this.timer3 = new System.Windows.Forms.Timer(this.components);
+            this.label10 = new System.Windows.Forms.Label();
+            this.label13 = new System.Windows.Forms.Label();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox2.SuspendLayout();
@@ -196,9 +199,9 @@
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Location = new System.Drawing.Point(16, 15);
+            this.pictureBox1.Location = new System.Drawing.Point(10, 10);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(1064, 555);
+            this.pictureBox1.Size = new System.Drawing.Size(1066, 557);
             this.pictureBox1.TabIndex = 12;
             this.pictureBox1.TabStop = false;
             // 
@@ -229,7 +232,7 @@
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(124, 90);
             this.button2.TabIndex = 22;
-            this.button2.Text = "画图";
+            this.button2.Text = "绘图 关";
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
@@ -269,11 +272,37 @@
             this.label11.TabIndex = 19;
             this.label11.Text = "y轴长度";
             // 
+            // timer3
+            // 
+            this.timer3.Enabled = true;
+            this.timer3.Interval = 50;
+            this.timer3.Tick += new System.EventHandler(this.timer3_Tick);
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(1, 718);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(87, 15);
+            this.label10.TabIndex = 24;
+            this.label10.Text = "sample_pkg";
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(101, 718);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(15, 15);
+            this.label13.TabIndex = 23;
+            this.label13.Text = "0";
+            // 
             // Form2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1092, 787);
+            this.Controls.Add(this.label10);
+            this.Controls.Add(this.label13);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.label11);
@@ -332,5 +361,8 @@
         private System.Windows.Forms.Label label15;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Timer timer3;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label label13;
     }
 }

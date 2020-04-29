@@ -1,0 +1,8 @@
+D:\CsTJMonstor\Src\C# 使用GDI+绘图 源代码\502259 Code CH48\CapsEditor\CapsEditor\bin\Debug\CapsEditor.exe
+D:\CsTJMonstor\Src\C# 使用GDI+绘图 源代码\502259 Code CH48\CapsEditor\CapsEditor\bin\Debug\CapsEditor.pdb
+D:\CsTJMonstor\Src\C# 使用GDI+绘图 源代码\502259 Code CH48\CapsEditor\CapsEditor\obj\Debug\CapsEditor.csprojResolveAssemblyReference.cache
+D:\CsTJMonstor\Src\C# 使用GDI+绘图 源代码\502259 Code CH48\CapsEditor\CapsEditor\obj\Debug\CapsEditor.Form1.resources
+D:\CsTJMonstor\Src\C# 使用GDI+绘图 源代码\502259 Code CH48\CapsEditor\CapsEditor\obj\Debug\CapsEditor.Properties.Resources.resources
+D:\CsTJMonstor\Src\C# 使用GDI+绘图 源代码\502259 Code CH48\CapsEditor\CapsEditor\obj\Debug\CapsEditor.csproj.GenerateResource.Cache
+D:\CsTJMonstor\Src\C# 使用GDI+绘图 源代码\502259 Code CH48\CapsEditor\CapsEditor\obj\Debug\CapsEditor.exe
+D:\CsTJMonstor\Src\C# 使用GDI+绘图 源代码\502259 Code CH48\CapsEditor\CapsEditor\obj\Debug\CapsEditor.pdb
