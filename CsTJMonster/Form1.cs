@@ -38,7 +38,8 @@ namespace CsTJMonster
         byte[] PKG;
         Bitmap Stream_Vec;//绘图区的bitmap位图
         Graphics Stream_VecG;//上述bitmap位图的绘图板
-        Form2 form_FFT;//z子窗体，显示数据的傅里叶值
+        Form2 form_FFT;//子窗体，显示数据的傅里叶值
+        Form3 form_PID;//子窗体，用于整定PID数值
 
         private enum frame { none, Status, Stream, pkg};
         private frame slv_frame;
@@ -567,17 +568,6 @@ namespace CsTJMonster
             }
         }
 
-        private void button5_Click(object sender, EventArgs e)
-        {
-            COM_close();
-            button_OpenCOM.BackColor = color_disable;
-            button_OpenCOM.Text = "Open";
-            timer1.Enabled = false;
-            
-            form_FFT = new Form2(obj);
-            form_FFT.ShowDialog(); 
-        }
-
         private void button2_Click(object sender, EventArgs e)
         {
             if (Status_update_label())
@@ -599,6 +589,27 @@ namespace CsTJMonster
         public float get_data()
         {
             return 100;
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            COM_close();
+            button_OpenCOM.BackColor = color_disable;
+            button_OpenCOM.Text = "Open";
+            timer1.Enabled = false;
+
+            form_FFT = new Form2(obj);
+            form_FFT.ShowDialog();
+        }
+        private void button7_Click(object sender, EventArgs e)
+        {
+            COM_close();
+            button_OpenCOM.BackColor = color_disable;
+            button_OpenCOM.Text = "Open";
+            timer1.Enabled = false;
+
+            form_PID = new Form3(obj);
+            form_PID.ShowDialog();
         }
     }
 }

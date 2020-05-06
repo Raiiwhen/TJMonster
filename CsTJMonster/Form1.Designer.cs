@@ -70,6 +70,7 @@
             this.toolStripStatusLabel11 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel12 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel13 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.button7 = new System.Windows.Forms.Button();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
             this.groupBox1.SuspendLayout();
@@ -121,7 +122,7 @@
             this.button_Sync.Name = "button_Sync";
             this.button_Sync.Size = new System.Drawing.Size(68, 57);
             this.button_Sync.TabIndex = 7;
-            this.button_Sync.Text = "同步";
+            this.button_Sync.Text = "同步0x08";
             this.button_Sync.UseVisualStyleBackColor = true;
             this.button_Sync.Click += new System.EventHandler(this.button2_Click);
             // 
@@ -131,7 +132,7 @@
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(68, 57);
             this.button3.TabIndex = 8;
-            this.button3.Text = "数据流";
+            this.button3.Text = "数据流0x09";
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
@@ -141,7 +142,7 @@
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(68, 57);
             this.button4.TabIndex = 9;
-            this.button4.Text = "数据包";
+            this.button4.Text = "数据包0x0c";
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
@@ -161,7 +162,7 @@
             this.button6.Name = "button6";
             this.button6.Size = new System.Drawing.Size(68, 57);
             this.button6.TabIndex = 11;
-            this.button6.Text = "Clear";
+            this.button6.Text = "Clear 0x0c";
             this.button6.UseVisualStyleBackColor = true;
             this.button6.Click += new System.EventHandler(this.button6_Click);
             // 
@@ -233,7 +234,7 @@
             series1.Legend = "Legend1";
             series1.Name = "Series1";
             this.chart1.Series.Add(series1);
-            this.chart1.Size = new System.Drawing.Size(340, 411);
+            this.chart1.Size = new System.Drawing.Size(408, 411);
             this.chart1.TabIndex = 16;
             this.chart1.Text = "数值通道";
             // 
@@ -317,9 +318,9 @@
             // groupBox3
             // 
             this.groupBox3.Controls.Add(this.pictureBox1);
-            this.groupBox3.Location = new System.Drawing.Point(682, 12);
+            this.groupBox3.Location = new System.Drawing.Point(750, 12);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(271, 474);
+            this.groupBox3.Size = new System.Drawing.Size(271, 487);
             this.groupBox3.TabIndex = 19;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "导航轨迹";
@@ -403,11 +404,22 @@
             this.toolStripStatusLabel13.Size = new System.Drawing.Size(24, 20);
             this.toolStripStatusLabel13.Text = "-1";
             // 
+            // button7
+            // 
+            this.button7.Location = new System.Drawing.Point(676, 12);
+            this.button7.Name = "button7";
+            this.button7.Size = new System.Drawing.Size(68, 57);
+            this.button7.TabIndex = 21;
+            this.button7.Text = "PID";
+            this.button7.UseVisualStyleBackColor = true;
+            this.button7.Click += new System.EventHandler(this.button7_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1260, 634);
+            this.Controls.Add(this.button7);
             this.Controls.Add(this.statusStrip2);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
@@ -480,6 +492,7 @@
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel11;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel12;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel13;
+        private System.Windows.Forms.Button button7;
     }
     
 }
