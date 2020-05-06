@@ -16,6 +16,7 @@ using System.Windows.Forms.DataVisualization.Charting;
  0a 0a 0d 子窗体，开启连续发送(实时，无误码)
  0b 0a 0d 子窗体，关闭连续发送
  0c 0a 0d 清零积分指令
+ 0e ..... 128B 数据交换
      */
 
 
@@ -33,11 +34,14 @@ namespace CsTJMonster
         Color color_error = Color.Lime;
         int RX_RATE_CNTER;//定时器2使用的变量，用于统计数据上下行速率
         bool Stream_EN = false;//使能定时器1
+        int err_cnt;
+        byte[] PKG;
         Bitmap Stream_Vec;//绘图区的bitmap位图
         Graphics Stream_VecG;//上述bitmap位图的绘图板
         Form2 form_FFT;//z子窗体，显示数据的傅里叶值
-        /*debug变量*/
-        int db_x, db_y;
+
+        private enum frame { none, Status, Stream, pkg};
+        private frame slv_frame;
 
         public Form1()
         {
@@ -50,6 +54,9 @@ namespace CsTJMonster
             /*变量初始化*/
             RX_Buffer = new List<byte>(1024);
             Series RX_stream = new Series("RX_stream");
+            slv_frame = frame.none;
+            err_cnt = 0;
+            PKG = new byte[128];
             /*波特率多选框comboBox初始话*/
             comboBox1.Items.Add(115200);
             comboBox1.Items.Add(9600);
@@ -79,10 +86,9 @@ namespace CsTJMonster
                 timer1.Enabled = true;
                 button_OpenCOM.BackColor = color_enable;
                 button_OpenCOM.Text = "Close";
-                button3.BackColor = color_enable;
-                button3.Text = "数据流\r\ning";
-                Status_cmd();
-                Stream_EN = true;
+                button3.BackColor = color_disable;
+                button3.Text = "数据流\r\n";
+                Stream_EN = false;
             }
             else
             {
@@ -102,6 +108,32 @@ namespace CsTJMonster
                 sp.Read(buffer, 0, sp.BytesToRead);
                 RX_Buffer.AddRange(buffer);
                 RX_RATE_CNTER += buffer.Length;
+                /*分流处理*/
+                if (obj.IsOpen && (RX_Buffer.Count() == 16) && (RX_Buffer[0] == 0xb1) && (RX_Buffer[1] == 0xb1))
+                {
+                    slv_frame = frame.Status;
+                }
+                else if (obj.IsOpen && (RX_Buffer.Count() == 128) && (RX_Buffer[0] == 0x0c) && (RX_Buffer[1] == 0x0c))
+                {
+                    slv_frame = frame.pkg;
+                    PKG = RX_Buffer.ToArray();
+                    RX_Buffer.Clear();
+                }
+                else if (obj.IsOpen && (RX_Buffer.Count() > 128))
+                {
+                    /*出现误码，删除0x0c 0x0c前的元素*/
+                    int length = RX_Buffer.Count();
+                    int frame_pos = 0;
+                    for(int i = 0; i < length-1; i++)
+                    {
+                        if (RX_Buffer[i] == 0x0c && RX_Buffer[i + 1] == 0x0c)
+                        {
+                            frame_pos = i;
+                        }
+                    }
+                    RX_Buffer.RemoveRange(0,frame_pos);
+                    err_cnt++;
+                }
             }
             catch
             {
@@ -123,11 +155,11 @@ namespace CsTJMonster
             string[] com_list = new string[5] { "-", "-", "-", "-", "-", };
 
             string[] str = SerialPort.GetPortNames();
-            for(int i = 0; i < str.Count() && i < com_list.Count(); i++)
+            Array.Sort(str);
+            for (int i = 0; i < str.Count() && i < com_list.Count(); i++)
             {
                 com_list[i] = str[i];
             }
-            
             radioButton1.Text = com_list[0]; radioButton1.Enabled = com_list[0] == "-" ? false : true;
             radioButton2.Text = com_list[1]; radioButton2.Enabled = com_list[1] == "-" ? false : true;
             radioButton3.Text = com_list[2]; radioButton3.Enabled = com_list[2] == "-" ? false : true;
@@ -184,7 +216,39 @@ namespace CsTJMonster
             }
         }
 
-        /*数据编解码与显示*/
+        /*显示RX_Buffer*/
+        private void Buffer_Update()
+        {
+            string str = "00 ";
+
+            try
+            {
+                byte[] watch_buffer = RX_Buffer.ToArray();
+                
+                int cnt = watch_buffer.Length;
+                
+                label1.Text = "";
+                for (int i = 0; i < 128; i++)
+                {
+                    if (i < cnt)
+                    {
+                        str = BitConverter.ToString(BitConverter.GetBytes(watch_buffer[i]));
+                        label1.Text += str.Substring(0, 2);
+                        label1.Text += ' ';
+                    }
+                    else
+                    {
+                        label1.Text += "00 ";
+                    }
+                }
+            }
+            catch
+            {
+
+            }
+        }
+
+        /*429状态 0x08*/
         private void Status_cmd()
         {
             byte[] mst_echo = new byte[3] { 0x08, 0x0a, 0x0d };
@@ -199,29 +263,14 @@ namespace CsTJMonster
             }
         }
 
-        /*清零指令*/
-        private void Stream_RST_cmd()
-        {
-            byte[] mst_echo = new byte[3] { 0x0c, 0x0a, 0x0d };
-            if (obj.IsOpen)
-            {
-                obj.Write(mst_echo, 0, 3);
-                cput("> 重设积分\r\n");
-            }
-            else
-            {
-                cput("> 重设失败，Serial Closed.\r\n");
-            }
-        }
-
         private bool Status_update_label()
         {
             string tmp;
             List<byte> status_buffer = new List<byte>(RX_Buffer.ToArray());
-            bool format_check = obj.IsOpen && (status_buffer.Count==16) && (status_buffer[0] == 0xb1) && (status_buffer[1] == 0xb1);
+            bool format_check = obj.IsOpen && (status_buffer.Count == 16) && (status_buffer[0] == 0xb1) && (status_buffer[1] == 0xb1);
 
             /*检查通过，清除串口缓存，开始分析和更新状态栏*/
-            RX_Buffer.Clear();
+            //RX_Buffer.Clear();
             if (format_check)
             {
                 toolStripStatusLabel1.Text =
@@ -235,10 +284,10 @@ namespace CsTJMonster
 
                 switch (status_buffer[8])
                 {
-                    case 0x00: tmp = "NAND offline";break;
+                    case 0x00: tmp = "NAND offline"; break;
                     case 0x01: tmp = "SAMSUNG K9 2GB " + (status_buffer[9] / 256).ToString() + '%'; break;
                     case 0x02: tmp = "SAMSUNG K9 4GB " + (status_buffer[9] / 256).ToString() + '%'; break;
-                    default: tmp = "NAND error";break;
+                    default: tmp = "NAND error"; break;
                 }
                 toolStripStatusLabel3.Text = tmp + " |";
 
@@ -261,12 +310,13 @@ namespace CsTJMonster
             return format_check;
         }
 
+        /*流交换 0x09*/
         private void Stream_cmd()
         {
             byte[] mst_echo = new byte[3] { 0x09, 0x0a, 0x0d };
             if (obj.IsOpen)
             {
-                RX_Buffer.Clear();
+                //RX_Buffer.Clear();
                 obj.Write(mst_echo, 0, 3);
                 cput("> data_stream\r\n");
             }
@@ -276,50 +326,23 @@ namespace CsTJMonster
             }
         }
 
-        private void Stream_update_label()
-        {
-            string str = "00 ";
-
-            try
-            {
-                byte[] watch_buffer = RX_Buffer.ToArray();
-                int cnt = watch_buffer.Length;
-                label1.Text = "";
-                for (int i = 0; i < 128; i++)
-                {
-                    if (i < cnt)
-                    {
-                        str = BitConverter.ToString(BitConverter.GetBytes(watch_buffer[i]));
-                        label1.Text += str.Substring(0, 2);
-                        label1.Text += ' ';
-                    }
-                    else
-                    {
-                        label1.Text += "00 ";
-                    }
-                }
-            }
-            catch
-            {
-
-            }
-        }
-
         private void Stream_update_chart()
         {
             Series RX_stream = new Series("RX_stream");
+            /*不检查帧错误*/
             try
             {
+                /*解码*/
                 List<byte> chart_buffer = new List<byte>(RX_Buffer.ToArray());
                 byte[] data = chart_buffer.ToArray();
-                chart1.Series[0].Points.Clear();
-                int[] tmp = new int[7] ;
-                for(int i = 0; i < 7; i++)
+                int[] tmp = new int[7];
+                for (int i = 0; i < 7; i++)
                 {
-                    tmp[i] = (data[i*2] * 256 + data[i*2+1]);
+                    tmp[i] = (data[i * 2] * 256 + data[i * 2 + 1]);
                     tmp[i] = (tmp[i] < 32768) ? (tmp[i]) : (tmp[i] - 65536);
                 }
-                
+                /*绘图*/
+                chart1.Series[0].Points.Clear();
                 chart1.Series.Clear();
                 RX_stream.ChartType = SeriesChartType.Column;
                 RX_stream.Points.AddXY("accx", tmp[0].ToString());
@@ -342,26 +365,29 @@ namespace CsTJMonster
         {
             try
             {
+                /*未检查帧错误*/
+                /*解码*/
                 List<byte> vector_buffer = new List<byte>(RX_Buffer.ToArray());
                 byte[] data = vector_buffer.ToArray();
                 int[] raw = new int[3];
-                double[] acc = new double[] { 0,0,0};
+                double[] acc = new double[] { 0, 0, 0 };
                 double deg = 0, abs = 0;
-                Point sp, ep;
 
                 for (int i = 0; i < 3; i++)
                 {
                     raw[i] = data[2 * i] * 256 + data[2 * i + 1];
                     raw[i] = raw[i] > 32678 ? raw[i] - 65536 : raw[i];
-                    acc[i] = Convert.ToDouble(raw[i])/ 56756 * Stream_Vec.Width;//矢量模长，归一化到画布高度的1/5
+                    acc[i] = Convert.ToDouble(raw[i]) / 56756 * Stream_Vec.Width;//矢量模长，归一化到画布高度的1/5
                 }
                 deg = System.Math.Atan(acc[0] / acc[1]);
                 abs = System.Math.Sqrt(System.Math.Pow(acc[0], 2) + System.Math.Pow(acc[1], 2));//加速度的模（单位: 2.828 g）
 
+                /*绘图*/
+                Point sp, ep;
                 Pen p = new Pen(Color.Red, 2);
                 p.StartCap = System.Drawing.Drawing2D.LineCap.ArrowAnchor;
                 p.EndCap = System.Drawing.Drawing2D.LineCap.RoundAnchor;
-                sp = new Point(Stream_Vec.Width/2, Stream_Vec.Height/2);
+                sp = new Point(Stream_Vec.Width / 2, Stream_Vec.Height / 2);
                 ep = sp + new Size(Convert.ToInt32(abs * System.Math.Cos(deg)), Convert.ToInt32(abs * System.Math.Sin(deg)));
                 Stream_VecG.Clear(color_enable);
                 Stream_VecG.DrawLine(p, ep, sp);
@@ -375,23 +401,89 @@ namespace CsTJMonster
             }
         }
 
+        /*清零指令 0xc*/
+        private void RST_cmd()
+        {
+            byte[] mst_echo = new byte[3] { 0x0c, 0x0a, 0x0d };
+            if (obj.IsOpen)
+            {
+                obj.Write(mst_echo, 0, 3);
+                cput("> 重设积分\r\n");
+            }
+            else
+            {
+                cput("> 重设失败，Serial Closed.\r\n");
+            }
+        }
+        
+        /*包交换 0x0e*/
+        private bool PKG_cmd()
+        {
+            byte[] mst_echo = new byte[3] { 0x0c, 0x0a, 0x0d };
+            if (obj.IsOpen)
+            {
+                obj.Write(mst_echo, 0, 3);
+                return true;
+            }
+            else
+            {
+                cput("> Echo error. Serial Closed.\r\n");
+                return false;
+            }
+        }
+
+        private bool PKG_decode()
+        {
+            float temp = 0;
+            slv_frame = frame.none;
+
+            temp = (float)(PKG[4] + PKG[5] * 256) / 100.0f;
+            toolStripStatusLabel9.Text = temp.ToString("F1") + " ℃";
+            temp = (float)(PKG[8] + PKG[9] * 256) / 100.0f;
+            toolStripStatusLabel7.Text = temp.ToString("F1") + " V";
+            
+            return true;
+        }
+
+        private bool PKG_encode()
+        {
+            return true;
+        }
+
+
         /*时基驱动逻辑*/
         private void timer1_Tick(object sender, EventArgs e)
         {
-            /*更新数据表*/
-            Stream_update_chart();
-            Stream_update_vectorBox();
-            /*更新缓冲区*/
-            Stream_update_label();
+            /*流更新*/
+            if (slv_frame == frame.Stream)
+            {
+                //Stream_update_chart();
+                //Stream_update_vectorBox();
+                /*绘制轨迹*/
+                pictureBox1.Refresh();
+            }
             /*更新状态栏*/
-            Status_update_label();
-            /*绘制轨迹*/
-            pictureBox1.Refresh();
+            if (slv_frame == frame.Status)
+            {
+                //Status_update_label();
+            }
+            /*包更新*/
+            if(slv_frame == frame.pkg)
+            {
+                PKG_decode();
+            }
+
+            /*更新缓冲区*/
+            Buffer_Update();
+            //RX_Buffer.Clear();
+            toolStripStatusLabel13.Text = err_cnt.ToString();
+
             /*发起数据请求*/
             if (Stream_EN)
             {
                 Stream_cmd();
             }
+            if (slv_frame == frame.none) PKG_cmd();
             /*清空发送区*/
             if (textBox1.Text.Length > 256)
             {
@@ -403,16 +495,16 @@ namespace CsTJMonster
         {
             if (RX_RATE_CNTER * 4 < 16)
             {
-                groupBox1.Text = "RX rate: " + (RX_RATE_CNTER * 4 * 8).ToString() + " bps";
+                toolStripStatusLabel11.Text = (RX_RATE_CNTER * 4 * 8).ToString() + " bps";
             }
             else if (RX_RATE_CNTER * 4 < 1024)
             {
-                groupBox1.Text = "RX rate: " + (RX_RATE_CNTER * 4).ToString() + " Bps";
+                toolStripStatusLabel11.Text = (RX_RATE_CNTER * 4).ToString() + " Bps";
             }
             else if (RX_RATE_CNTER * 4 < 1024 * 1024)
             {
                 float rate_kBps = (float)RX_RATE_CNTER * 4 / 1024;
-                groupBox1.Text = "RX rate: " + rate_kBps.ToString("F2") + " kBps";
+                toolStripStatusLabel11.Text = rate_kBps.ToString("F2") + " kBps";
             }
             RX_RATE_CNTER = 0;
         }
@@ -427,17 +519,7 @@ namespace CsTJMonster
         
         private void button4_Click(object sender, EventArgs e)
         {
-            int red = 0;
-            int white = 11;
-            while (white <= 100)
-            {
-                Stream_VecG.FillRectangle(Brushes.DeepSkyBlue, 0, red + db_y, 200, 10);
-                Stream_VecG.FillRectangle(Brushes.White, 0, white + db_y, 200, 10);
-                red += 20;
-                white += 20;
-            }
-            db_y += 130;
-            pictureBox1.Image = Stream_Vec;
+            PKG_cmd();
         }
         
         private void button3_Click(object sender, EventArgs e)
@@ -511,7 +593,7 @@ namespace CsTJMonster
 
         private void button6_Click(object sender, EventArgs e)
         {
-            Stream_RST_cmd();
+            RST_cmd();
         }
         
         public float get_data()
