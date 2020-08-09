@@ -17,6 +17,8 @@ using System.Windows.Forms.DataVisualization.Charting;
  0b 0a 0d 子窗体，关闭连续发送
  0c 0a 0d 清零积分指令
  0e ..... 128B 数据交换
+ 0f 0a 0d 下载PID 结构体
+ 10 0a 0d 上传PID 结构体
      */
 
 
@@ -224,10 +226,10 @@ namespace CsTJMonster
 
             try
             {
-                byte[] watch_buffer = RX_Buffer.ToArray();
+                byte[] watch_buffer = PKG;
                 
                 int cnt = watch_buffer.Length;
-                
+                /*label1显示全体RX_Buffer*/
                 label1.Text = "";
                 for (int i = 0; i < 128; i++)
                 {
@@ -240,6 +242,21 @@ namespace CsTJMonster
                     else
                     {
                         label1.Text += "00 ";
+                    }
+                }
+                /*文本框显示对齐的内存区*/
+                label10.Text = "";
+                for (int i = 12; i < 108; i++)
+                {
+                    if (i < cnt)
+                    {
+                        str = BitConverter.ToString(BitConverter.GetBytes(watch_buffer[i]));
+                        label10.Text += str.Substring(0, 2);
+                        label10.Text += ' ';
+                    }
+                    else
+                    {
+                        label10.Text += "00 ";
                     }
                 }
             }
@@ -436,13 +453,44 @@ namespace CsTJMonster
         private bool PKG_decode()
         {
             float temp = 0;
+            int M2006_size = 24;
+            uint id;
+            short rpm;
+            ushort mom, cmd, deg;
+            byte[] M2006_struct = PKG.Skip(12).Take(M2006_size*4).ToArray();
             slv_frame = frame.none;
 
             temp = (float)(PKG[4] + PKG[5] * 256) / 100.0f;
             toolStripStatusLabel9.Text = temp.ToString("F1") + " ℃";
             temp = (float)(PKG[8] + PKG[9] * 256) / 100.0f;
             toolStripStatusLabel7.Text = temp.ToString("F1") + " V";
-            
+
+            id = M2006_struct[0];
+            cmd = (ushort)(M2006_struct[2] << 8 | M2006_struct[1]);
+            rpm = (short)(M2006_struct[4] << 8 | M2006_struct[3]);
+            deg = (ushort)(M2006_struct[6] << 8 | M2006_struct[5]);
+            mom = (ushort)(M2006_struct[8] << 8 | M2006_struct[7]);
+            groupBox4.Text = "LF ID:";
+            groupBox4.Text += id.ToString();
+            label6.Text = cmd.ToString();
+            label9.Text = rpm.ToString();
+            label8.Text = deg.ToString();
+            label7.Text = mom.ToString();
+
+
+            groupBox6.Text = "LF ID:";
+            groupBox6.Text += M2006_struct[M2006_size].ToString();
+
+
+            groupBox7.Text = "LF ID:";
+            groupBox7.Text += M2006_struct[M2006_size*2].ToString();
+
+
+            groupBox8.Text = "LF ID:";
+            groupBox8.Text += M2006_struct[M2006_size*3].ToString();
+
+
+
             return true;
         }
 
@@ -469,15 +517,16 @@ namespace CsTJMonster
                 //Status_update_label();
             }
             /*包更新*/
-            if(slv_frame == frame.pkg)
+            if (slv_frame == frame.pkg)
             {
                 PKG_decode();
-            }
 
-            /*更新缓冲区*/
-            Buffer_Update();
-            //RX_Buffer.Clear();
-            toolStripStatusLabel13.Text = err_cnt.ToString();
+
+                /*更新缓冲区*/
+                Buffer_Update();
+                //RX_Buffer.Clear();
+                toolStripStatusLabel13.Text = err_cnt.ToString();
+            }
 
             /*发起数据请求*/
             if (Stream_EN)
@@ -494,17 +543,19 @@ namespace CsTJMonster
 
         private void rate_speed_Tick(object sender, EventArgs e)
         {
-            if (RX_RATE_CNTER * 4 < 16)
+
+            RX_RATE_CNTER *= 10;
+            if (RX_RATE_CNTER < 16)
             {
-                toolStripStatusLabel11.Text = (RX_RATE_CNTER * 4 * 8).ToString() + " bps";
+                toolStripStatusLabel11.Text = (RX_RATE_CNTER * 8).ToString() + " bps";
             }
-            else if (RX_RATE_CNTER * 4 < 1024)
+            else if (RX_RATE_CNTER < 1024)
             {
-                toolStripStatusLabel11.Text = (RX_RATE_CNTER * 4).ToString() + " Bps";
+                toolStripStatusLabel11.Text = (RX_RATE_CNTER).ToString() + " Bps";
             }
-            else if (RX_RATE_CNTER * 4 < 1024 * 1024)
+            else if (RX_RATE_CNTER < 1024 * 1024)
             {
-                float rate_kBps = (float)RX_RATE_CNTER * 4 / 1024;
+                float rate_kBps = (float)RX_RATE_CNTER / 1024;
                 toolStripStatusLabel11.Text = rate_kBps.ToString("F2") + " kBps";
             }
             RX_RATE_CNTER = 0;

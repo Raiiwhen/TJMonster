@@ -8,3 +8,4 @@ D:\CsTJMonstor\CsTJMonster\obj\Release\CsTJMonster.exe
 D:\CsTJMonstor\CsTJMonster\obj\Release\CsTJMonster.pdb
 D:\CsTJMonstor\CsTJMonster\obj\Release\CsTJMonster.csprojResolveAssemblyReference.cache
 D:\CsTJMonstor\CsTJMonster\obj\Release\CsTJMonster.Form2.resources
+D:\CsTJMonstor\CsTJMonster\obj\Release\CsTJMonster.Form3.resources
